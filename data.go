@@ -100,9 +100,10 @@ func (c *Cluster) Print() {
 				p.Name,
 				strconv.Itoa(int(p.Usage))+"%",
 			)
-			if n_id < len(c.Nodes)-1 {
-				table.AddSeparator()
-			}
+
+		}
+		if n_id < len(c.Nodes)-1 {
+			table.AddSeparator()
 		}
 	}
 	fmt.Printf("\033[2J")
