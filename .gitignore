@@ -1,0 +1,10 @@
+.local/get_uid
+.local/mem.txt
+.local/read_mem
+cluster-top
+cluster-top-node
+cluster-top-server
+cluster-top.env
+cpuinfo
+cpuinfo.go
+
