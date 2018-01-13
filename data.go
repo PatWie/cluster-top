@@ -79,27 +79,31 @@ func (c *Cluster) Print() {
 
 	table := termtables.CreateTable()
 
-	table.AddHeaders("Node", "RAM-Usage", "Pid", "User", "Command", "CPU-Util")
+	table.AddHeaders("Node", "RAM-Util", "RAM-Util", "Pid", "User", "Command", "CPU-Util")
 	for n_id, n := range c.Nodes {
 		for p_id, p := range n.Processes {
 			name := ""
 			memory := ""
+			memory_per := ""
+
 			if p_id == 0 {
 				name = n.Name
-				memory = strconv.FormatInt(n.Memory.Used/1024, 10) +
-					"MiB / " +
-					strconv.FormatInt(n.Memory.Total/1024, 10) + "MiB" + " (" +
-					strconv.Itoa(int(100-n.Memory.Usage)) + "%)"
+				memory = strconv.FormatInt(n.Memory.Used/1024/1024, 10) +
+					"GiB / " +
+					strconv.FormatInt(n.Memory.Total/1024/1024, 10) + "GiB"
+				memory_per = strconv.Itoa(int(n.Memory.Usage)) + "%"
 			}
 
 			table.AddRow(
 				name,
 				memory,
+				memory_per,
 				p.Pid,
 				p.Username,
 				p.Name,
 				strconv.Itoa(int(p.Usage))+"%",
 			)
+			table.SetAlign(termtables.AlignRight, 2)
 
 		}
 		if n_id < len(c.Nodes)-1 {
