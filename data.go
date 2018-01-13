@@ -76,6 +76,7 @@ func (c *Cluster) Sort() {
 }
 
 func (c *Cluster) Print() {
+
 	table := termtables.CreateTable()
 
 	table.AddHeaders("Node", "RAM-Usage", "Pid", "User", "Command", "CPU-Util")

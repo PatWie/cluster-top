@@ -37,7 +37,6 @@ func main() {
 	SocketAddr := "tcp://" + cfg.ServerIp + ":" + cfg.ServerPortDistribute
 	request_socket.Connect(SocketAddr)
 	for {
-
 		// request new update
 		msg, err := RequestUpdateMessage()
 		if err != nil {
@@ -50,7 +49,7 @@ func main() {
 			panic(err)
 		}
 
-		// response from cluster-smi-server
+		// response from cluster-top-server
 		s, err := request_socket.RecvBytes(0)
 		if err != nil {
 			log.Println(err)
@@ -66,6 +65,9 @@ func main() {
 
 		var clus Cluster
 		err = msgpack.Unmarshal(s, &clus)
+		if err != nil {
+			panic(err)
+		}
 		clus.Sort()
 		clus.Print()
 		time.Sleep(cfg.Tick)

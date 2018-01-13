@@ -2,7 +2,7 @@ PACKAGER="github.com/patwie/cluster-top/compiletimeconst"
 
 # add compile-time constants to avoid path issues to configuration files
 include cluster-top.env
-LDFLAGS="-X ${PACKAGER}.ServerIp=${cluster_top_server_ip} -X ${PACKAGER}.PortGather=${cluster_top_server_port_gather} -X ${PACKAGER}.PortDistribute=${cluster_top_server_port_distribute} -X ${PACKAGER}.Tick=${cluster_top_tick_ms}"
+LDFLAGS="-X ${PACKAGER}.MaxDisplay=${cluster_max_display} -X ${PACKAGER}.ServerIp=${cluster_top_server_ip} -X ${PACKAGER}.PortGather=${cluster_top_server_port_gather} -X ${PACKAGER}.PortDistribute=${cluster_top_server_port_distribute} -X ${PACKAGER}.Tick=${cluster_top_tick_ms}"
 
 all:
 		go build -ldflags ${LDFLAGS} cluster-top.go config.go data.go

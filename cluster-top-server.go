@@ -23,7 +23,7 @@ func main() {
 
 	// receiving messages in extra thread
 	go func() {
-		SocketAddr := "tcp://" + "*" + ":" + cfg.ServerPortGather
+		SocketAddr := "tcp://*:" + cfg.ServerPortGather
 		log.Println("Now listening on", SocketAddr)
 		node_socket, err := zmq4.NewSocket(zmq4.PULL)
 
@@ -55,7 +55,7 @@ func main() {
 	}()
 
 	// outgoing messages (REQ-ROUTER)
-	SocketAddr := "tcp://" + "*" + ":" + cfg.ServerPortDistribute
+	SocketAddr := "tcp://*:" + cfg.ServerPortDistribute
 	log.Println("Router binds to", SocketAddr)
 	router_socket, err := zmq4.NewSocket(zmq4.ROUTER)
 	if err != nil {
