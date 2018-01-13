@@ -32,7 +32,7 @@ type Memory struct {
 func FetchMemory(m *Memory) {
 	m.Total, m.Free, m.Available = proc.GetMemoryInfo()
 	m.Used = m.Total - m.Free
-	m.Usage = float32(100 * float64(m.Used) / float64(m.Free))
+	m.Usage = float32(100 * float64(m.Used) / float64(m.Total))
 }
 
 type Cpu struct {
