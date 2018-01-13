@@ -24,3 +24,4 @@ Output should be something like
 +---------+---------------------------+-------+-------+-----------------+----------+
 ```
 
+You might be interested as well in [cluster-smi](https://github.com/PatWie/cluster-smi) for GPUS.
