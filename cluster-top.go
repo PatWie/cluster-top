@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"github.com/pebbe/zmq4"
 	"github.com/vmihailenco/msgpack"
@@ -22,7 +23,10 @@ func RequestUpdateMessage() (buf []byte, err error) {
 
 func main() {
 
-	cfg := CreateConfig()
+	showTimePtr := flag.Bool("t", false, "show time of events")
+	flag.Parse()
+
+	cfg := LoadConfig()
 
 	request_attempts := 0
 
@@ -34,7 +38,7 @@ func main() {
 	}
 	defer request_socket.Close()
 
-	SocketAddr := "tcp://" + cfg.ServerIp + ":" + cfg.ServerPortDistribute
+	SocketAddr := "tcp://" + cfg.RouterIp + ":" + cfg.Ports.Clients
 	request_socket.Connect(SocketAddr)
 	for {
 		// request new update
@@ -69,8 +73,8 @@ func main() {
 			panic(err)
 		}
 		clus.Sort()
-		clus.Print()
-		time.Sleep(cfg.Tick)
+		clus.Print(*showTimePtr)
+		time.Sleep(time.Duration(cfg.Tick) * time.Second)
 	}
 
 }

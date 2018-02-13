@@ -11,14 +11,16 @@ import (
 
 // representing a single process
 type Process struct {
-	Pid      int
-	Name     string
-	Uid      int
+	UID      int
 	TimePrev int64
-	TimeCur  int64
 	Dirty    bool
 	Active   bool
 	Usage    float32
+	PIDInfo  PIDInfo
+}
+
+func (p *Process) CurrentTime() int64 {
+	return p.PIDInfo.UsedTime + p.PIDInfo.StartTime
 }
 
 func UpdateProcessList(procs map[int]*Process) {
@@ -44,7 +46,7 @@ func UpdateProcessList(procs map[int]*Process) {
 
 		p := procs[pid]
 
-		uid := UidFromPid(pid)
+		uid := UIDFromPID(pid)
 
 		// ignore root
 		if uid == 0 {
@@ -53,15 +55,21 @@ func UpdateProcessList(procs map[int]*Process) {
 
 		if p == nil {
 			// is a new process
-			p = &Process{pid, "", uid, 0, 0, true, true, 0.}
+			p = &Process{UID: uid,
+				TimePrev: 0,
+				Dirty:    true,
+				Active:   true,
+				Usage:    0.,
+				PIDInfo:  PIDInfo{},
+			}
 		} else {
 			// just update
 			p.Dirty = false
 			p.Active = true
-			p.TimePrev = p.TimeCur
+			p.TimePrev = p.CurrentTime()
 		}
 
-		p.TimeCur, p.Name = PidInformation(pid)
+		p.PIDInfo = InfoFromPid(pid)
 		procs[pid] = p
 	}
 

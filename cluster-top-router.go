@@ -16,14 +16,15 @@ var allNodes map[string]Node
 func main() {
 
 	// load ports and ip-address
-	cfg := CreateConfig()
+	cfg := LoadConfig()
+	cfg.Print()
 
 	allNodes = make(map[string]Node)
 	var mutex = &sync.Mutex{}
 
 	// receiving messages in extra thread
 	go func() {
-		SocketAddr := "tcp://*:" + cfg.ServerPortGather
+		SocketAddr := "tcp://*:" + cfg.Ports.Nodes
 		log.Println("Now listening on", SocketAddr)
 		node_socket, err := zmq4.NewSocket(zmq4.PULL)
 
@@ -49,13 +50,16 @@ func main() {
 			}
 
 			mutex.Lock()
+			if _, ok := allNodes[node.Name]; !ok {
+				log.Printf("A new node \"%v\" connected\n", node.Name)
+			}
 			allNodes[node.Name] = node
 			mutex.Unlock()
 		}
 	}()
 
 	// outgoing messages (REQ-ROUTER)
-	SocketAddr := "tcp://*:" + cfg.ServerPortDistribute
+	SocketAddr := "tcp://*:" + cfg.Ports.Clients
 	log.Println("Router binds to", SocketAddr)
 	router_socket, err := zmq4.NewSocket(zmq4.ROUTER)
 	if err != nil {

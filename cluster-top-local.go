@@ -1,11 +1,8 @@
 package main
 
 import (
-	"fmt"
+	"flag"
 	"github.com/patwie/cluster-top/proc"
-	"github.com/pebbe/zmq4"
-	"github.com/vmihailenco/msgpack"
-	"log"
 	"time"
 )
 
@@ -16,21 +13,13 @@ var clus Cluster
 
 func main() {
 
+	showTimePtr := flag.Bool("t", false, "show time of events")
+	flag.Parse()
+
 	work_processes = make(map[int]*proc.Process)
 
 	// load ports and ip-address
 	cfg := LoadConfig()
-	cfg.Print()
-
-	// sending messages (PUSH-PULL)
-	SocketAddr := "tcp://" + cfg.RouterIp + ":" + cfg.Ports.Nodes
-	log.Println("Now pushing to", SocketAddr)
-	socket, err := zmq4.NewSocket(zmq4.PUSH)
-	if err != nil {
-		panic(err)
-	}
-	defer socket.Close()
-	socket.Connect(SocketAddr)
 
 	node := Node{}
 	InitNode(&node)
@@ -39,8 +28,6 @@ func main() {
 	cpu_tick_prev := int64(0)
 	cpu_tick_cur := int64(0)
 	cores := proc.NumberCPUCores()
-
-	fmt.Printf("Found %v cores\n", cores)
 
 	for {
 		// reset most processes
@@ -55,15 +42,7 @@ func main() {
 		FetchMemory(&clus.Nodes[0].Memory)
 		clus.Nodes[0].Time = time.Now()
 
-		// encode data
-		msg, err := msgpack.Marshal(&clus.Nodes[0])
-		if err != nil {
-			log.Fatal("encode error:", err)
-			panic(err)
-		}
-
-		// send data
-		socket.SendBytes(msg, 0)
+		clus.Print(*showTimePtr)
 
 		cpu_tick_prev = cpu_tick_cur
 		time.Sleep(time.Duration(cfg.Tick) * time.Second)
