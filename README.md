@@ -1,5 +1,8 @@
 # CLUSTER-TOP
 
+**This is currently highly experimental**. In the meantime checkout [cluster-smi](https://github.com/PatWie/cluster-smi) for GPUs,
+
+
 The same as `top` but for multiple machines at the same time.
 
 This use low-level C-code for efficiency for most operations. It only supports Linux (tested under Ubuntu)!
