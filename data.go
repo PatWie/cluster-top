@@ -67,6 +67,10 @@ func (c *Cpu) RelativeIoWait() float64 {
 	// TODO check 10000 (should be 100?)
 	wa := float64(waitPeriod / totalPeriod * 10000)
 
+	if wa <= 0 {
+		wa = 0
+	}
+
 	return wa
 }
 
@@ -194,7 +198,7 @@ func (c *Cluster) Print(show_time bool) {
 
 	}
 	fmt.Printf("\033[2J")
-	fmt.Println(time.Now().Format("Mon Jan 2 15:04:05 2006") + " (http://github.com/patwie/cluster-smi)")
+	fmt.Println(time.Now().Format("Mon Jan 2 15:04:05 2006") + " (http://github.com/patwie/cluster-top)")
 	fmt.Println(table.Render())
 }
 
