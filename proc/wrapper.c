@@ -99,7 +99,10 @@ void get_uid_from_pid(unsigned long pid, unsigned long *uid) {
 }
 
 // read cpu tick for a specific process
-void read_pid_info(unsigned long pid, unsigned long *time, unsigned long long *starttime, char *name) {
+void read_pid_info(unsigned long pid,
+  unsigned long *time,
+  unsigned long long *starttime,
+  char *name) {
 
   char fn[MAX_NAME + 1];
   snprintf(fn, sizeof fn, "/proc/%ld/stat", pid);
@@ -168,3 +171,32 @@ unsigned int num_cores() {
   return sysconf(_SC_NPROCESSORS_ONLN);
 }
 
+
+// read total cpu time
+void read_cpu_info(
+  unsigned long long int* total_time,
+  unsigned long long int* ioWait) {
+  unsigned long long int usertime, nicetime, systemtime, idletime;
+  unsigned long long int irq, softIrq, steal, guest, guestnice;
+  usertime = nicetime = systemtime = idletime = 0;
+  *total_time = *ioWait = irq = softIrq = steal = guest = guestnice = 0;
+
+
+  FILE *fp;
+  fp = fopen("/proc/stat", "r");
+  if (fp != NULL) {
+    if (fscanf(fp,   "cpu  %16llu %16llu %16llu %16llu %16llu %16llu %16llu %16llu %16llu %16llu",
+               &usertime, &nicetime, &systemtime, &idletime,
+               ioWait, &irq, &softIrq, &steal, &guest, &guestnice) == EOF) {
+      fclose(fp);
+
+      return;
+    } else {
+      fclose(fp);
+      *total_time = usertime + nicetime + systemtime + idletime + ioWait + irq + softIrq + steal + guest + guestnice;
+      return;
+    }
+  } else {
+    return;
+  }
+}

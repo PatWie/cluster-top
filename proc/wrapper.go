@@ -50,6 +50,16 @@ func CpuTick() (t int64) {
 	return int64(C.read_cpu_tick())
 }
 
+func CpuInfo() (int64, int64) {
+
+	totalTime := C.ulonglong(0)
+	ioWait := C.ulonglong(0)
+
+	C.read_cpu_info(&totalTime, &ioWait)
+
+	return int64(totalTime), int64(ioWait)
+}
+
 // TimeAndNameFromPID returns used time (int) and command (string)
 func InfoFromPid(pid int) PIDInfo {
 

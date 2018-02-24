@@ -44,8 +44,30 @@ func FetchMemory(m *Memory) {
 	m.Usage = float32(100 * float64(m.Used) / float64(m.Total))
 }
 
+type CpuInfo struct {
+	TotalTime int64
+	IoWait    int64
+}
+
 type Cpu struct {
-	Cores int
+	Cores    int
+	Current  CpuInfo
+	Previous CpuInfo
+}
+
+func (c *Cpu) Update() {
+	c.Previous.TotalTime = c.Current.TotalTime
+	c.Previous.IoWait = c.Current.IoWait
+	c.Current.TotalTime, c.Current.IoWait = proc.CpuInfo()
+}
+
+func (c *Cpu) RelativeIoWait() float64 {
+	totalPeriod := float64(c.Current.TotalTime - c.Previous.TotalTime)
+	waitPeriod := float64(c.Current.IoWait - c.Previous.IoWait)
+	// TODO check 10000 (should be 100?)
+	wa := float64(waitPeriod / totalPeriod * 10000)
+
+	return wa
 }
 
 type Node struct {
@@ -89,7 +111,7 @@ func (c *Cluster) Print(show_time bool) {
 
 	table := termtables.CreateTable()
 
-	tableHeader := []interface{}{"Node", "RAM-Util", "RAM-Util", "PID", "User", "Command", "CPU-Util"}
+	tableHeader := []interface{}{"Node", "RAM-Util", "wa", "PID", "User", "Command", "CPU-Util"}
 	if show_time {
 		tableHeader = append(tableHeader, "Last Seen")
 	}
@@ -101,15 +123,16 @@ func (c *Cluster) Print(show_time bool) {
 
 		if len(n.Processes) == 0 {
 
-			memory := strconv.FormatInt(n.Memory.Used/1024/1024, 10) +
-				"GiB / " +
-				strconv.FormatInt(n.Memory.Total/1024/1024, 10) + "GiB"
-			memory_per := strconv.Itoa(int(n.Memory.Usage)) + "%"
+			memory := fmt.Sprintf("%vGiB / %vGiB (%3v%%)",
+				int(n.Memory.Used/1024/1024),
+				int(n.Memory.Total/1024/1024),
+				int(n.Memory.Usage),
+			)
 
 			tableRow := []interface{}{
 				n.Name,
 				memory,
-				memory_per,
+				"",
 				"",
 				"",
 				"",
@@ -126,20 +149,23 @@ func (c *Cluster) Print(show_time bool) {
 			for p_id, p := range n.Processes {
 				name := ""
 				memory := ""
-				memory_per := ""
+				wa := ""
 
 				if p_id == 0 {
 					name = n.Name
-					memory = strconv.FormatInt(n.Memory.Used/1024/1024, 10) +
-						"GiB / " +
-						strconv.FormatInt(n.Memory.Total/1024/1024, 10) + "GiB"
-					memory_per = strconv.Itoa(int(n.Memory.Usage)) + "%"
+					memory = fmt.Sprintf("%vGiB / %vGiB (%3v%%)",
+						int(n.Memory.Used/1024/1024),
+						int(n.Memory.Total/1024/1024),
+						int(n.Memory.Usage),
+					)
+
+					wa = fmt.Sprintf("%0.1f", n.Cpu.RelativeIoWait())
 				}
 
 				tableRow := []interface{}{
 					name,
 					memory,
-					memory_per,
+					wa,
 					p.Info.PID,
 					p.Username,
 					p.Info.Command,

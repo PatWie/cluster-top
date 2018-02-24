@@ -48,6 +48,7 @@ func main() {
 
 		cpu_tick_cur = proc.CpuTick()
 		proc.UpdateProcessList(work_processes)
+		clus.Nodes[0].Cpu.Update()
 
 		factor := float32(cpu_tick_cur-cpu_tick_prev) / float32(cores) / 100.
 		clus.Nodes[0].Processes = GetProcesses(work_processes, factor, cfg.MaxDisplay)
